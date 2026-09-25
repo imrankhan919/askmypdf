@@ -5,8 +5,11 @@ dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
 import { chunkText } from "@/lib/chunker";
 import { connectDB } from "@/lib/db";
+import { embedDocuments } from "@/lib/gemini";
 import { pdfToText } from "@/lib/pdf";
 import { Chunk } from "@/models/Chunk";
+
+export const maxDuration = 60;
 
 export async function POST(request: Request) {
   try {
@@ -42,6 +45,7 @@ export async function POST(request: Request) {
     }
 
     const pieces = chunkText(text);
+    const vectors = await embedDocuments(pieces);
 
     await connectDB();
     await Chunk.deleteMany({ filename: file.name });
@@ -50,6 +54,7 @@ export async function POST(request: Request) {
         filename: file.name,
         chunkIndex: i,
         text: piece,
+        embedding: vectors[i],
       })),
     );
 
