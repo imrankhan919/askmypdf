@@ -41,3 +41,12 @@ export async function embedQuestion(question: string): Promise<number[]> {
   const [vector] = await embed([question], "RETRIEVAL_QUERY");
   return vector;
 }
+
+export async function generateText(prompt: string): Promise<string> {
+  const ai = getClient();
+  const response = await ai.models.generateContent({
+    model: CHAT_MODEL,
+    contents: prompt,
+  });
+  return response.text ?? "";
+}
